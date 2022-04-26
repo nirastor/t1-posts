@@ -29,6 +29,12 @@
 </template>
 
 <script>
+import {
+  fetchPostById,
+  fetchUserById,
+  fetchPostCommentsByPostId,
+} from '@/lib/api'
+
 export default {
   data() {
     return {
@@ -37,28 +43,11 @@ export default {
       comments: null,
     }
   },
-  computed: {
-    postId() {
-      return Number(this.$route.params.id)
-    },
-  },
   async created() {
-    console.log('go create')
-    const rawPost = await fetch(
-      `https://jsonplaceholder.typicode.com/posts/${this.postId}`
-    )
-    this.post = await rawPost.json()
-    const authorId = this.post.userId
-
-    const rawAuthor = await fetch(
-      `https://jsonplaceholder.typicode.com/users/${authorId}`
-    )
-    this.author = await rawAuthor.json()
-
-    const rawComments = await fetch(
-      `https://jsonplaceholder.typicode.com/comments?postId=${this.postId}`
-    )
-    this.comments = await rawComments.json()
+    const { id } = this.$route.params
+    this.post = await fetchPostById(id)
+    this.author = await fetchUserById(this.post.userId)
+    this.comments = await fetchPostCommentsByPostId(id)
   },
 }
 </script>

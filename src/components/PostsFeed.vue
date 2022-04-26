@@ -1,18 +1,19 @@
 <template>
   <div>
-    <div class="d-flex">
+    <div class="d-flex align-baseline">
       <v-select
-        style="max-width: 320px"
+        style="max-width: 240px; width: 240px"
+        class="mr-4"
         :items="authorsNames"
         v-model="selectedAuthor"
         label="Фильтр по автору"
         clearable
       ></v-select>
-      <v-btn text @click="onSortClick"
+      <v-btn text plain @click="onSortClick"
         >Сортировать по заголовку {{ sortIcon }}</v-btn
       >
       <v-spacer></v-spacer>
-      <v-btn @click="onAddClick">Добавить запись</v-btn>
+      <v-btn text plain @click="onAddClick">Добавить запись</v-btn>
     </div>
     <div v-if="posts">
       <PostCard v-for="post in postsForDisplay" :key="post.id" :post="post" />
@@ -21,28 +22,16 @@
 </template>
 
 <script>
-// todo: design of buttons-bar
-
 import PostCard from '@/components/PostCard.vue'
+import { POST_URL } from '@/lib/paths'
+import { fetchPosts, fetchUsers } from '@/lib/api'
 
-// todo move to sorting helper
-const ascByTitleSort = (a, b) => {
-  if (a.title > b.title) return 1
-  if (a.title < b.title) return -1
-  return 0
-}
-
-const descByTitleSort = (a, b) => {
-  if (a.title < b.title) return 1
-  if (a.title > b.title) return -1
-  return 0
-}
-
-const SORT = {
-  0: { name: 'default', icon: '' },
-  1: { name: 'asc', icon: '▲', sortFunction: ascByTitleSort },
-  2: { name: 'desc', icon: '▼', sortFunction: descByTitleSort },
-}
+import {
+  SORT,
+  SORT_DEFAULT,
+  SORT_OPTIONS_MAX,
+  SORT_OPTIONS_MIN,
+} from '@/lib/sort'
 
 export default {
   components: {
@@ -53,16 +42,18 @@ export default {
       posts: null,
       authorsNames: null,
       selectedAuthor: null,
-      sortState: 0,
+      sortState: null,
     }
   },
   methods: {
-    // todo: Remove magic digits
     onSortClick() {
-      this.sortState = this.sortState === 2 ? 0 : this.sortState + 1
+      this.sortState += 1
+      if (this.sortState > SORT_OPTIONS_MAX) {
+        this.sortState = SORT_OPTIONS_MIN
+      }
     },
     onAddClick() {
-      this.$router.push('/post')
+      this.$router.push(POST_URL)
     },
   },
   computed: {
@@ -85,25 +76,18 @@ export default {
     },
   },
   async created() {
-    // todo: need try catch
-    // todo: move to store
-    // todo: split to different functions by comments
+    this.sortState = SORT_DEFAULT
 
-    // get posts
-    const rawPosts = await fetch('https://jsonplaceholder.typicode.com/posts')
-    const posts = await rawPosts.json()
+    const posts = await fetchPosts()
+    const authors = await fetchUsers()
 
-    // get authors
-    const rawAuthors = await fetch('https://jsonplaceholder.typicode.com/users')
-    const authors = await rawAuthors.json()
-    // todo: better use select with authorId but for demo purpose it will be name
     this.authorsNames = authors.map(a => a.name).sort()
 
-    // merge posts and authors
     const authorsNamesMap = {}
     authors.forEach(a => {
       authorsNamesMap[a.id] = a.name
     })
+
     this.posts = posts.map(p => ({ ...p, author: authorsNamesMap[p.userId] }))
   },
 }

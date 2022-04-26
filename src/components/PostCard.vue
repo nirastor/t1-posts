@@ -7,11 +7,13 @@
 </template>
 
 <script>
+import { POST_URL } from '@/lib/paths'
+
 export default {
   props: ['post'],
   methods: {
     onClick() {
-      this.$router.push(`/post/${this.post.id}`)
+      this.$router.push(POST_URL + '/' + this.post.id)
     },
   },
 }
