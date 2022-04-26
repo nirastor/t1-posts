@@ -12,9 +12,11 @@
         >Сортировать по заголовку {{ sortIcon }}</v-btn
       >
       <v-spacer></v-spacer>
-      <v-btn>Добавить запись</v-btn>
+      <v-btn @click="onAddClick">Добавить запись</v-btn>
     </div>
-    <PostCard v-for="post in postsForDisplay" :key="post.id" :post="post" />
+    <div v-if="posts">
+      <PostCard v-for="post in postsForDisplay" :key="post.id" :post="post" />
+    </div>
   </div>
 </template>
 
@@ -58,6 +60,9 @@ export default {
     // todo: Remove magic digits
     onSortClick() {
       this.sortState = this.sortState === 2 ? 0 : this.sortState + 1
+    },
+    onAddClick() {
+      this.$router.push('/post')
     },
   },
   computed: {
