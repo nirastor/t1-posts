@@ -1,15 +1,15 @@
 <template>
-  <hello-world />
+  <PostsFeed />
 </template>
 
 <script>
-import HelloWorld from "../components/HelloWorld";
+import PostsFeed from '@/components/PostsFeed.vue'
 
 export default {
-  name: "HomeView",
+  name: 'HomeView',
 
   components: {
-    HelloWorld,
+    PostsFeed,
   },
-};
+}
 </script>
