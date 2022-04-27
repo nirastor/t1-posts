@@ -9,12 +9,16 @@
         label="Фильтр по автору"
         clearable
       ></v-select>
+
       <v-btn text plain @click="onSortClick"
         >Сортировать по заголовку {{ sortIcon }}</v-btn
       >
+
       <v-spacer></v-spacer>
+
       <v-btn text plain @click="onAddClick">Добавить запись</v-btn>
     </div>
+
     <div v-if="posts">
       <PostCard v-for="post in postsForDisplay" :key="post.id" :post="post" />
     </div>
@@ -45,22 +49,13 @@ export default {
       sortState: null,
     }
   },
-  methods: {
-    onSortClick() {
-      this.sortState += 1
-      if (this.sortState > SORT_OPTIONS_MAX) {
-        this.sortState = SORT_OPTIONS_MIN
-      }
-    },
-    onAddClick() {
-      this.$router.push(POST_URL)
-    },
-  },
   computed: {
     sortIcon() {
       return SORT[this.sortState].icon
     },
     postsForDisplay() {
+      // todo: write with small separate functions
+
       // attention that objects in post still copied by link, but here it's ok
       const posts = [...this.posts]
 
@@ -76,19 +71,37 @@ export default {
     },
   },
   async created() {
-    this.sortState = SORT_DEFAULT
+    this.setDefaultValues()
 
     const posts = await fetchPosts()
     const authors = await fetchUsers()
 
-    this.authorsNames = authors.map(a => a.name).sort()
-
-    const authorsNamesMap = {}
-    authors.forEach(a => {
-      authorsNamesMap[a.id] = a.name
-    })
-
-    this.posts = posts.map(p => ({ ...p, author: authorsNamesMap[p.userId] }))
+    this.setAuthorNamesFrom(authors)
+    this.setPostsWithAuthors(posts, authors)
+  },
+  methods: {
+    setDefaultValues() {
+      this.sortState = SORT_DEFAULT
+    },
+    setAuthorNamesFrom(authors) {
+      this.authorsNames = authors.map(a => a.name).sort()
+    },
+    setPostsWithAuthors(posts, authors) {
+      const authorsNamesMap = {}
+      authors.forEach(a => {
+        authorsNamesMap[a.id] = a.name
+      })
+      this.posts = posts.map(p => ({ ...p, author: authorsNamesMap[p.userId] }))
+    },
+    onSortClick() {
+      this.sortState += 1
+      if (this.sortState > SORT_OPTIONS_MAX) {
+        this.sortState = SORT_OPTIONS_MIN
+      }
+    },
+    onAddClick() {
+      this.$router.push(POST_URL)
+    },
   },
 }
 </script>
