@@ -39,5 +39,3 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
-
-# Small Readme update for test gh-access
